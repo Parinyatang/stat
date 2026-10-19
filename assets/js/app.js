@@ -481,8 +481,9 @@ function pagePlan() {
     '<tr style="background:var(--surface-2)"><td colspan="2"><b>รวม</b></td><td class="num"><b>100</b></td></tr>' +
     '</tbody></table></div>';
 
-  h += '<h2 class="sec">ผู้สอน</h2><div class="card"><ul style="margin:0">' +
-    C.teachers.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>';
+  h += '<h2 class="sec">ผู้สอน</h2><div class="card"><p style="margin:0">' +
+    'รายชื่อและช่องทางติดต่ออาจารย์ผู้สอน ดูได้จากประมวลรายวิชาที่ได้รับในชั้นเรียน ' +
+    'หรือระบบสารสนเทศของมหาวิทยาลัย — ไม่ได้เผยแพร่ไว้ในเว็บนี้เพื่อคุ้มครองข้อมูลส่วนบุคคล</p></div>';
 
   h += '<h2 class="sec">แหล่งข้อมูลสำหรับศึกษาด้วยตนเอง</h2><div class="card"><ul style="margin:0">' +
     C.refs.map(r => '<li style="font-size:14px">' + esc(r) + '</li>').join('') + '</ul></div>';

@@ -13,8 +13,10 @@ const nav = document.getElementById('nav');
 const KEY = 'statlab.v1';
 
 /* ---------- สถานะการเรียน ---------- */
-let ST = { read: {}, quiz: {}, lab: {}, theme: null, fs: 'm' };
+let ST = { read: {}, quiz: {}, lab: {}, prac: {}, theme: null, fs: 'm' };
 try { ST = Object.assign(ST, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
+ST.prac = ST.prac || {};
+const EX = window.EXERCISES || [];
 function save() { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) { } }
 
 /* ---------- ธีม ---------- */
@@ -95,6 +97,8 @@ function buildNav() {
   h += '</div>';
 
   h += '<div class="nav-group"><div class="nav-label">ฝึกฝน</div>' +
+    item('#/practice/mid', '🧮', 'แบบฝึกหัด · กลางภาค') +
+    item('#/practice/fin', '🧮', 'แบบฝึกหัด · ปลายภาค') +
     item('#/quizzes', '✏️', 'แบบทดสอบท้ายบท') +
     item('#/exam', '📝', 'ข้อสอบจำลอง') +
     '</div>';
@@ -204,7 +208,9 @@ function pageHome() {
     quick('#/tools/picker', '🧭', 'ไม่รู้ว่าใช้สถิติตัวไหน', 'ตอบคำถามไม่กี่ข้อ ระบบแนะนำให้') +
     quick('#/tools/table', '📋', 'ต้องการค่าวิกฤต', 'ตาราง Z, t, χ², F คำนวณสดทันที') +
     quick('#/formulas', '∑', 'ทบทวนสูตรก่อนสอบ', 'รวมสูตรทั้ง 7 บทไว้หน้าเดียว') +
-    quick('#/exam', '📝', 'ลองทำข้อสอบจำลอง', 'สุ่มข้อสอบจากทุกบทพร้อมจับเวลา') +
+    quick('#/practice/mid', '🧮', 'แบบฝึกหัดกลางภาค', EX.filter(e => e.exam === 'mid').length + ' ข้อ พร้อมคำใบ้และวิธีทำ') +
+    quick('#/practice/fin', '🧮', 'แบบฝึกหัดปลายภาค', EX.filter(e => e.exam === 'fin').length + ' ข้อ พร้อมคำใบ้และวิธีทำ') +
+    quick('#/exam', '📝', 'ลองทำข้อสอบจำลอง', 'สุ่มข้อสอบแยกชุดกลางภาค / ปลายภาค') +
     quick('#/lab/cicover', '🔬', 'พิสูจน์ "95%" ด้วยตาตัวเอง', 'สร้างช่วงความเชื่อมั่น 100 ช่วงแล้วนับที่พลาด') +
     quick('#/lab', '⚗️', 'เข้าห้องปฏิบัติการ', LAB_KEYS.length + ' แลบจำลองครบทุกบท') +
     quick('#/plan', '🗓', 'คำนวณเกรด', 'ใส่คะแนนที่ได้ ดูว่าจะได้เกรดอะไร') +
@@ -251,7 +257,8 @@ function pageChapter(no) {
     '<span>' + (read ? '✓ คุณทำเครื่องหมายว่าอ่านบทนี้แล้ว' : 'อ่านจบแล้วใช่ไหม? ทำเครื่องหมายเพื่อบันทึกความคืบหน้า') + '</span>' +
     '<div style="display:flex;gap:9px;flex-wrap:wrap">' +
     '<button class="btn' + (read ? ' ghost' : '') + '" id="markRead">' + (read ? 'ยกเลิกเครื่องหมาย' : 'ทำเครื่องหมายว่าอ่านแล้ว') + '</button>' +
-    '<a class="btn ghost" href="#/quiz/' + c.no + '">ทำแบบทดสอบ ' + c.quiz.length + ' ข้อ →</a></div></div>';
+    '<a class="btn ghost" href="#/quiz/' + c.no + '">ทำแบบทดสอบ ' + c.quiz.length + ' ข้อ →</a>' +
+    practiceLinks(c) + '</div></div>';
 
   const myLabs = LAB_KEYS.filter(k => LABS[k].ch === c.no);
   if (myLabs.length) {
@@ -405,25 +412,119 @@ function pageQuizzes() {
   return h + '</div>';
 }
 
+/* ---------- แบบฝึกหัดเขียนตอบ ---------- */
+function practiceLinks(c) {
+  const g = examOf(c);
+  return ['mid', 'fin'].filter(x => g === x || g === 'both').map(x => {
+    const n = EX.filter(e => e.ch === c.no && e.exam === x).length;
+    return n ? '<a class="btn ghost" href="#/practice/' + x + '/' + c.no + '">🧮 แบบฝึกหัด' +
+      (g === 'both' ? (x === 'mid' ? 'กลางภาค' : 'ปลายภาค') : '') + ' ' + n + ' ข้อ →</a>' : '';
+  }).join('');
+}
+
+function pagePractice(set, chNo) {
+  set = set === 'fin' ? 'fin' : 'mid';
+  const all = EX.filter(e => e.exam === set);
+  const chs = [...new Set(all.map(e => e.ch))];
+  const list = chNo ? all.filter(e => e.ch === +chNo) : all;
+  const done = all.filter(e => ST.prac[e.id]).length;
+  const name = set === 'mid' ? 'กลางภาค' : 'ปลายภาค';
+  const exam = (C.exams || []).find(e => e.t === 'สอบ' + name);
+
+  let h = '<div class="page-head"><div class="page-kicker">ฝึกฝน · แบบฝึกหัดเขียนตอบ</div>' +
+    '<h1>แบบฝึกหัด' + name + ' ' + examTag(set) + '</h1>' +
+    '<p>ลองทำในกระดาษก่อน ติดตรงไหนค่อยเปิดคำใบ้ แล้วจึงเปิดวิธีทำเพื่อตรวจคำตอบ' +
+    (exam ? ' · สอบ' + name + ' ' + exam.when : '') + '</p>' +
+    '<div class="seg">' +
+    '<a href="#/practice/mid" class="' + (set === 'mid' ? 'on' : '') + '">กลางภาค</a>' +
+    '<a href="#/practice/fin" class="' + (set === 'fin' ? 'on' : '') + '">ปลายภาค</a></div>' +
+    '<div class="chips">' +
+    '<a class="chip' + (!chNo ? ' acc' : '') + '" href="#/practice/' + set + '">ทุกบท (' + all.length + ')</a>' +
+    chs.map(n => '<a class="chip' + (+chNo === n ? ' acc' : '') + '" href="#/practice/' + set + '/' + n + '">บทที่ ' + n +
+      ' (' + all.filter(e => e.ch === n).length + ')</a>').join('') + '</div>' +
+    '<div class="ex-prog"><div class="ex-bar"><i style="width:' + Math.round(done / all.length * 100) + '%"></i></div>' +
+    '<span id="exDone">ทำได้แล้ว ' + done + ' / ' + all.length + ' ข้อ</span></div></div>';
+
+  list.forEach(e => {
+    const c = CH.find(x => x.no === e.ch);
+    const ok = ST.prac[e.id];
+    h += '<div class="ex-card' + (ok ? ' ok' : '') + '" data-id="' + e.id + '">' +
+      '<div class="ex-head"><span class="ex-n">ข้อ ' + (all.indexOf(e) + 1) + '</span>' +
+      '<a href="#/ch/' + e.ch + '">บทที่ ' + e.ch + (e.sec ? ' · หัวข้อ ' + e.sec : '') + '</a>' +
+      '<span class="ex-lvl" title="ระดับความยาก">' + '★'.repeat(e.lvl) + '<s>' + '★'.repeat(3 - e.lvl) + '</s></span></div>' +
+      '<div class="ex-q">' + e.q + '</div>' +
+      '<div class="ex-btns">' +
+      '<button class="btn sm ghost" data-act="hint">💡 คำใบ้</button>' +
+      '<button class="btn sm ghost" data-act="sol">ดูวิธีทำ</button>' +
+      '<button class="btn sm' + (ok ? '' : ' ghost') + '" data-act="ok">' + (ok ? '✓ ทำได้แล้ว' : 'ทำได้แล้ว') + '</button></div>' +
+      '<div class="ex-hint" hidden><b>คำใบ้</b> ' + e.hint + '</div>' +
+      '<div class="ex-sol" hidden><div class="ex-ans"><b>คำตอบ</b> ' + e.ans + '</div>' + e.sol + '</div></div>';
+  });
+
+  h += '<div class="pager"><a href="#/exam/' + set + '"><small>พร้อมแล้ว?</small><strong>ทำข้อสอบจำลอง' + name + ' →</strong></a>' +
+    '<a class="nx" href="#/practice/' + (set === 'mid' ? 'fin' : 'mid') + '"><small>สลับชุด →</small><strong>แบบฝึกหัด' +
+    (set === 'mid' ? 'ปลายภาค' : 'กลางภาค') + '</strong></a></div>';
+  return h;
+}
+
+function afterPractice(set) {
+  const all = EX.filter(e => e.exam === (set === 'fin' ? 'fin' : 'mid'));
+  main.addEventListener('click', onPracClick);
+  function onPracClick(ev) {
+    const b = ev.target.closest('.ex-card button');
+    if (!b) return;
+    if (!document.body.contains(b)) return;
+    const card = b.closest('.ex-card'), id = card.dataset.id, act = b.dataset.act;
+    if (act === 'hint' || act === 'sol') {
+      const box = card.querySelector(act === 'hint' ? '.ex-hint' : '.ex-sol');
+      box.hidden = !box.hidden;
+      b.classList.toggle('on', !box.hidden);
+    } else if (act === 'ok') {
+      if (ST.prac[id]) delete ST.prac[id]; else ST.prac[id] = 1;
+      save();
+      const ok = !!ST.prac[id];
+      card.classList.toggle('ok', ok);
+      b.classList.toggle('ghost', !ok);
+      b.textContent = ok ? '✓ ทำได้แล้ว' : 'ทำได้แล้ว';
+      const n = all.filter(e => ST.prac[e.id]).length;
+      document.getElementById('exDone').textContent = 'ทำได้แล้ว ' + n + ' / ' + all.length + ' ข้อ';
+      document.querySelector('.ex-bar i').style.width = Math.round(n / all.length * 100) + '%';
+    }
+  }
+  // ถอดตัวฟังเมื่อเปลี่ยนหน้า เพื่อไม่ให้ซ้อนกัน
+  window.addEventListener('hashchange', () => main.removeEventListener('click', onPracClick), { once: true });
+}
+
 /* ---------- ข้อสอบจำลอง ---------- */
-let examItems = null;
-function pageExam(regen) {
-  if (!examItems || regen) {
+let examItems = null, examMode = null;
+const EXAM_PER = { all: 3, mid: 4, fin: 6 };  // จำนวนข้อต่อบท
+function pageExam(regen, mode) {
+  mode = mode === 'mid' || mode === 'fin' ? mode : 'all';
+  if (!examItems || regen || examMode !== mode) {
+    examMode = mode;
     const pool = [];
-    CH.forEach(c => c.quiz.forEach(q => pool.push(Object.assign({ _ch: c.no }, q))));
+    CH.filter(c => mode === 'all' || examOf(c) === mode || examOf(c) === 'both')
+      .forEach(c => c.quiz.forEach(q => pool.push(Object.assign({ _ch: c.no }, q))));
     // สุ่มโดยกระจายให้ครบทุกบท
     const byCh = {};
     pool.forEach(q => (byCh[q._ch] = byCh[q._ch] || []).push(q));
     const picked = [];
     Object.keys(byCh).forEach(k => {
       const arr = byCh[k].slice().sort(() => Math.random() - 0.5);
-      picked.push.apply(picked, arr.slice(0, 3));
+      picked.push.apply(picked, arr.slice(0, EXAM_PER[mode]));
     });
     examItems = picked.sort(() => Math.random() - 0.5);
   }
+  const label = { all: 'ข้อสอบรวมทุกบท', mid: 'ข้อสอบจำลองกลางภาค', fin: 'ข้อสอบจำลองปลายภาค' }[mode];
+  const scope = { all: 'ทุกบท', mid: 'บทที่ 1–5', fin: 'บทที่ 5–7' }[mode];
   return '<div class="page-head"><div class="page-kicker">ข้อสอบจำลอง</div>' +
-    '<h1>ข้อสอบรวม ' + examItems.length + ' ข้อ</h1>' +
-    '<p>สุ่มข้อสอบจากทุกบท บทละ 3 ข้อ สลับลำดับใหม่ทุกครั้ง — เหมาะสำหรับทบทวนก่อนสอบกลางภาคและปลายภาค</p>' +
+    '<h1>' + label + ' ' + (mode === 'all' ? '' : examTag(mode)) + '</h1>' +
+    '<p>' + examItems.length + ' ข้อ สุ่มจาก' + scope + ' สลับลำดับใหม่ทุกครั้ง' +
+    ' (บทละ ' + EXAM_PER[mode] + ' ข้อ)' + '</p>' +
+    '<div class="seg">' +
+    '<a href="#/exam/mid" class="' + (mode === 'mid' ? 'on' : '') + '">กลางภาค</a>' +
+    '<a href="#/exam/fin" class="' + (mode === 'fin' ? 'on' : '') + '">ปลายภาค</a>' +
+    '<a href="#/exam" class="' + (mode === 'all' ? 'on' : '') + '">รวมทุกบท</a></div>' +
     '<button class="btn ghost" id="exNew">สุ่มชุดใหม่</button></div>' +
     renderQuiz(examItems);
 }
@@ -734,7 +835,7 @@ function route(keepScroll) {
   const p = hash.replace(/^#\//, '').split('/');
   let html, after = null;
   // บทเรียนจัดเลย์เอาต์เอง · แบบทดสอบใช้คอลัมน์อ่าน · หน้าที่เหลือใช้ความกว้างเต็ม
-  const narrow = p[0] === 'quiz' || p[0] === 'exam';
+  const narrow = p[0] === 'quiz' || p[0] === 'exam' || p[0] === 'practice';
   const wrap = p[0] === 'ch' ? null : (narrow ? 'doc-body reading' : 'wide');
 
   if (!p[0]) html = pageHome();
@@ -745,8 +846,9 @@ function route(keepScroll) {
     after = () => { if (c) wireQuiz(c.quiz, s => { ST.quiz[c.id] = s; save(); buildNav(); updateProgress(); }); };
   }
   else if (p[0] === 'quizzes') html = pageQuizzes();
+  else if (p[0] === 'practice') { html = pagePractice(p[1], p[2]); after = () => afterPractice(p[1]); }
   else if (p[0] === 'exam') {
-    html = pageExam();
+    html = pageExam(false, p[1]);
     after = () => {
       wireQuiz(examItems);
       const b = document.getElementById('exNew');

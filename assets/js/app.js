@@ -244,7 +244,8 @@ function pageChapter(no) {
 
   c.sections.forEach(s => {
     h += '<h2 class="sec" id="sec-' + s.id + '">' + s.id + ' &nbsp;' + esc(s.title) +
-      (secExam(s) ? ' ' + examTag(secExam(s)) : '') + '</h2>' + s.h;
+      (secExam(s) ? ' ' + examTag(secExam(s)) : '') + '</h2>' +
+      s.h.replace(/<div data-fig="([\w-]+)"><\/div>/g, (m, n) => window.FIGURES ? FIGURES.render(n) : '');
   });
 
   h += '<h2 class="sec" id="sec-formulas">สรุปสูตรประจำบท</h2><div class="tbl-wrap"><table>' +

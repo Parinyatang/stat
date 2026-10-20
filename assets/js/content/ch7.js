@@ -56,6 +56,8 @@ h: `
 <div class="fml">$$b_1=\\frac{SS_{xy}}{SS_{xx}}=r\\cdot\\frac{S_y}{S_x},\\qquad b_0=\\bar{Y}-b_1\\bar{X}$$</div>
 <p>โดย $SS_{xy}=\\sum(x-\\bar{x})(y-\\bar{y})$, $SS_{xx}=\\sum(x-\\bar{x})^2$, $SS_{yy}=\\sum(y-\\bar{y})^2$</p>
 
+<div data-fig="scatter-resid"></div>
+
 <h3 class="sub">การตีความสัมประสิทธิ์</h3>
 <ul>
 <li><b>$b_1$ (ความชัน)</b> — เมื่อ $X$ เพิ่มขึ้น 1 หน่วย $Y$ เปลี่ยนไปโดยเฉลี่ย $b_1$ หน่วย</li>
@@ -65,6 +67,8 @@ h: `
 <h3 class="sub">การแยกความแปรผัน</h3>
 <div class="fml">$$SST=SSR+SSE$$
 $$\\sum(Y_i-\\bar{Y})^2=\\sum(\\hat{Y}_i-\\bar{Y})^2+\\sum(Y_i-\\hat{Y}_i)^2$$</div>
+
+<div data-fig="sst-split"></div>
 
 <h3 class="sub">สัมประสิทธิ์การตัดสินใจ</h3>
 <div class="fml">$$R^2=\\frac{SSR}{SST}=1-\\frac{SSE}{SST}=r^2$$</div>
@@ -122,6 +126,8 @@ h: `
 </tbody></table></div>
 <p>เครื่องหมายบอกทิศทาง: $r>0$ แปรผันตามกัน · $r&lt;0$ แปรผกผัน · $r=0$ ไม่มีความสัมพันธ์<b>เชิงเส้น</b></p>
 
+<div data-fig="r-gallery"></div>
+
 <h3 class="sub">ความสัมพันธ์กับการถดถอย</h3>
 <p>$r$ และ $b_1$ มีเครื่องหมายเดียวกันเสมอ เพราะทั้งคู่มาจาก $SS_{xy}$ ตัวเดียวกัน</p>
 <div class="fml">$$b_1=r\\cdot\\frac{S_y}{S_x}\\qquad\\qquad R^2=r^2$$</div>
@@ -174,6 +180,8 @@ $r=0.5$ ที่ $n=50$ → $t=4.00$, $p&lt;0.001$ (มีนัยสำคั
 <div class="fml">$$\\text{CI ของค่าเฉลี่ย }Y\\text{ ที่ }x_0:\\quad \\hat{Y}\\pm t_{\\alpha/2}\\,S_{Y\\cdot X}\\sqrt{\\frac{1}{n}+\\frac{(x_0-\\bar{x})^2}{SS_{xx}}}$$
 $$\\text{PI ของค่า }Y\\text{ รายตัวที่ }x_0:\\quad \\hat{Y}\\pm t_{\\alpha/2}\\,S_{Y\\cdot X}\\sqrt{1+\\frac{1}{n}+\\frac{(x_0-\\bar{x})^2}{SS_{xx}}}$$</div>
 <p class="fml-cap"><b>ช่วงพยากรณ์กว้างกว่าเสมอ</b> เพราะต้องรวมความผันแปรของตัว $Y$ เองเข้าไปด้วย (เลข 1 ที่เพิ่มมาในราก) และทั้งสองช่วงจะกว้างขึ้นเมื่อ $x_0$ ห่างจาก $\\bar{x}$</p>
+
+<div data-fig="ci-pi"></div>
 
 <h2 class="sub" style="font-size:1.12em;margin-top:2em">ค. การถดถอยและสหสัมพันธ์เชิงพหุคูณ</h2>
 

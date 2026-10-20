@@ -695,3 +695,42 @@ a.chip.acc{color:var(--accent)}
 .ex-sol .tbl-wrap{margin:8px 0 12px}
 .ex-ans{margin:0 0 10px;padding-bottom:9px;border-bottom:1px dashed var(--border)}
 .ex-ans b{color:var(--ok);margin-right:4px}
+
+/* ---------- ภาพประกอบในบทเรียน ---------- */
+.fig{margin:1.8em 0;padding:16px 14px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+html[data-theme="dark"] .fig{background:var(--surface-2)}
+.fig svg{display:block;width:100%;height:auto;max-width:620px;margin:0 auto;overflow:visible;stroke:none;stroke-width:1;fill:var(--text)}
+.fig figcaption{font-size:.84em;color:var(--text-2);line-height:1.75;text-align:center;margin:12px auto 0;max-width:36rem}
+.fig text{font-family:var(--sans);font-size:15px;fill:var(--text-2)}
+.fig text.sm{font-size:13.5px}
+.fig text.xs{font-size:12px}
+.fig text.big{font-size:19px}
+.fig text.b{font-weight:600}
+.fig .ink,.fig .cink{fill:var(--text)}
+.fig .mute{fill:var(--text-3)}
+.fig .bg{fill:var(--surface)}
+html[data-theme="dark"] .fig .bg{fill:var(--surface-2)}
+.fig .ca{fill:var(--accent)}
+.fig .cb{fill:var(--warn)}
+.fig .cc{fill:var(--violet)}
+.fig .cok{fill:var(--ok)}
+.fig .cd{fill:var(--danger)}
+.fig .mk{fill:var(--text-3)}
+.fig .ax{stroke:var(--text-3);stroke-width:1.2;fill:none}
+.fig .grid{stroke:var(--text-3);stroke-width:1;fill:none;opacity:.5}
+.fig .ln{stroke:var(--text);stroke-width:2;fill:none}
+.fig .la{stroke:var(--accent)}
+.fig .lb{stroke:var(--warn)}
+.fig .lc{stroke:var(--violet)}
+.fig .ld{stroke:var(--danger)}
+.fig .lok{stroke:var(--ok)}
+.fig .dash{stroke-dasharray:6 4}
+.fig-s{overflow-x:auto;scrollbar-width:thin}
+.fig-hint{display:none}
+@media (max-width:700px){
+  .fig{padding:12px 6px 10px;cursor:zoom-in}
+  .fig-hint{display:block;text-align:center;font-size:.72em;color:var(--text-3);margin-top:6px}
+  .fig.big{cursor:zoom-out}
+  .fig.big svg{width:580px;max-width:none}
+}
+@media print{ .fig{break-inside:avoid} }

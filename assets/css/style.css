@@ -651,3 +651,16 @@ canvas{max-width:100%;display:block;border-radius:var(--r-sm)}
 @media (max-width:620px){
   .lab-q-b,.lab-q-a{margin-left:0}
 }
+
+/* ---------- ป้ายขอบเขตสอบ (กลางภาค / ปลายภาค) ---------- */
+.xtag{display:inline-block;font-size:.72rem;font-weight:600;line-height:1.5;padding:1px 9px;
+  border-radius:99px;vertical-align:middle;white-space:nowrap;letter-spacing:0}
+.xtag + .xtag{margin-left:4px}
+.xtag.mid{background:var(--violet-soft);color:var(--violet)}
+.xtag.fin{background:var(--warn-soft);color:var(--warn)}
+.xtag.sm{font-size:10.5px;padding:0 6px;font-weight:600}
+.xtags{flex:none;margin-left:auto;display:flex;gap:3px}
+.xtags .xtag + .xtag{margin-left:0}
+.xlegend{font-size:.86em;color:var(--text-2);margin:-4px 0 14px;line-height:2}
+.xhead{font-size:.9em;color:var(--text-2);margin:10px 0 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.xhead span:not(.xtag){font-size:.92em}

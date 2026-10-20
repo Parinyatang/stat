@@ -89,6 +89,7 @@ function buildNav() {
     const done = ST.read[c.id];
     h += '<a class="nav-item' + (done ? ' done' : '') + '" href="#/ch/' + c.no + '" data-r="#/ch/' + c.no + '">' +
       '<span class="nav-num">' + c.no + '</span><span class="nav-txt">' + esc(c.short) + '</span>' +
+      '<span class="xtags">' + examTag(examOf(c), true) + '</span>' +
       (done ? '<svg class="nav-tick" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>' : '') + '</a>';
   });
   h += '</div>';
@@ -128,6 +129,16 @@ function buildNav() {
   nav.innerHTML = h;
   markNav();
 }
+// ป้ายขอบเขตสอบ: mid = กลางภาค, fin = ปลายภาค, both = คร่อมทั้งสอง
+function examTag(g, small) {
+  if (!g) return '';
+  const cls = small ? ' sm' : '';
+  if (g === 'both') return '<span class="xtag mid' + cls + '">กลาง</span><span class="xtag fin' + cls + '">ปลาย</span>';
+  return '<span class="xtag ' + g + cls + '">' + (g === 'mid' ? (small ? 'กลาง' : 'กลางภาค') : (small ? 'ปลาย' : 'ปลายภาค')) + '</span>';
+}
+function examOf(c) { return (C.examOf || {})[c.no]; }
+function secExam(s) { return (C.secExam || {})[s.id]; }
+
 function item(href, ic, txt) {
   return '<a class="nav-item" href="' + href + '" data-r="' + href + '">' +
     '<span style="width:23px;text-align:center;flex:none">' + ic + '</span>' +
@@ -165,12 +176,14 @@ function pageHome() {
       '<a href="#/ch/' + next.no + '" class="btn">เริ่มเรียนบทนี้ →</a></div>';
   }
 
-  h += '<h2 class="sec">บทเรียนทั้งหมด</h2><div class="grid g2">';
+  h += '<h2 class="sec">บทเรียนทั้งหมด</h2>' +
+    '<div class="xlegend">' + examTag('mid') + ' บทที่ 1–4 และ 5.1–5.3 &nbsp;·&nbsp; ' +
+    examTag('fin') + ' 5.4–5.5 และบทที่ 6–7</div><div class="grid g2">';
   CH.forEach(c => {
     const done = ST.read[c.id], q = ST.quiz[c.id];
     h += '<a class="ch-card" href="#/ch/' + c.no + '">' +
       (done ? '<span class="ribbon">อ่านแล้ว</span>' : '') +
-      '<span class="cn">บทที่ ' + c.no + '</span>' +
+      '<span class="cn">บทที่ ' + c.no + ' ' + examTag(examOf(c)) + '</span>' +
       '<h3>' + esc(c.title) + '</h3><p>' + esc(c.intro) + '</p>' +
       '<div class="ch-meta">' +
       '<span>🕐 ' + c.hours + ' ชม.</span>' +
@@ -212,16 +225,20 @@ function pageChapter(no) {
   const i = CH.indexOf(c);
 
   let toc = '<aside class="toc"><div class="tt">ในบทนี้</div>';
-  c.sections.forEach(s => toc += '<a href="#sec-' + s.id + '" data-sec="sec-' + s.id + '">' + s.id + ' ' + esc(s.title) + '</a>');
+  c.sections.forEach(s => toc += '<a href="#sec-' + s.id + '" data-sec="sec-' + s.id + '">' + s.id + ' ' + esc(s.title) +
+    (secExam(s) ? ' ' + examTag(secExam(s), true) : '') + '</a>');
   toc += '<a href="#sec-formulas" data-sec="sec-formulas">สรุปสูตร</a></aside>';
 
   let h = '<div class="doc"><article class="doc-body"><div class="page-head">' +
     '<div class="page-kicker">บทที่ ' + c.no + ' · ' + c.weeks + ' · ' + c.hours + ' ชั่วโมง</div>' +
     '<h1>' + esc(c.title) + '</h1><p>' + esc(c.intro) + '</p>' +
+    '<div class="xhead">ออกสอบ: ' + examTag(examOf(c)) +
+    (examOf(c) === 'both' ? ' <span>หัวข้อ 5.1–5.3 ออกกลางภาค · 5.4–5.5 ออกปลายภาค</span>' : '') + '</div>' +
     '<div class="chips">' + c.clos.map(x => '<span class="chip acc">' + x + '</span>').join('') + '</div></div>';
 
   c.sections.forEach(s => {
-    h += '<h2 class="sec" id="sec-' + s.id + '">' + s.id + ' &nbsp;' + esc(s.title) + '</h2>' + s.h;
+    h += '<h2 class="sec" id="sec-' + s.id + '">' + s.id + ' &nbsp;' + esc(s.title) +
+      (secExam(s) ? ' ' + examTag(secExam(s)) : '') + '</h2>' + s.h;
   });
 
   h += '<h2 class="sec" id="sec-formulas">สรุปสูตรประจำบท</h2><div class="tbl-wrap"><table>' +
